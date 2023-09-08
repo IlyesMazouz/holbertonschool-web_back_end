@@ -6,6 +6,10 @@ from pymongo import MongoClient
 
 
 def get_logs_collection():
+    """
+    establishes a connection to the MongoDB database
+    and returns the 'nginx' collection
+    """
     client = MongoClient("mongodb://localhost:27017/")
     db = client.logs
     collection = db.nginx
@@ -13,10 +17,16 @@ def get_logs_collection():
 
 
 def count_documents(collection):
+    """
+    counts the total number of documents in a given collection
+    """
     return collection.count_documents({})
 
 
 def count_methods(collection):
+    """
+    counts the number of documents for each HTTP method in a given collection
+    """
     methods = ["GET", "POST", "PUT", "PATCH", "DELETE"]
     method_counts = {}
     for method in methods:
@@ -26,6 +36,9 @@ def count_methods(collection):
 
 
 def count_status_check(collection):
+    """
+    counts the number of status check documents in a given collection
+    """
     count = collection.count_documents({"method": "GET", "path": "/status"})
     return count
 
