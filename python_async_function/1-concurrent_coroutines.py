@@ -20,6 +20,9 @@ async def wait_random(max_delay: int = 10) -> float:
 
 
 async def wait_n(n: int, max_delay: int) -> List[float]:
+    """
+    randome delay
+    """
     delays = []
 
     async def wait_random_and_append():
