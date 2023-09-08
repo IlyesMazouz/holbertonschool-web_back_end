@@ -5,10 +5,12 @@ pagination script for popular baby names dataset
 import csv
 from typing import List
 
+
 class Server:
     """
     server class to paginate a database of popular baby names
     """
+
     DATA_FILE = "Popular_Baby_Names.csv"
 
     def __init__(self):
@@ -30,13 +32,15 @@ class Server:
         """
         retrieve a page of data from the dataset
         """
-        assert isinstance(page, int) and page > 0, "Page must be a positive integer."
-        assert isinstance(page_size, int) and page_size > 0, "Page size must be a positive integer."
+        assert isinstance(page, int) and page > 0, "must be a positive integer"
+        assert (
+            isinstance(page_size, int) and page_size > 0
+        ), "Page size must be a positive integer."
 
         start_index, end_index = self.index_range(page, page_size)
 
         if start_index >= len(self.dataset()):
-            return []  
+            return []
 
         return self.dataset()[start_index:end_index]
 
