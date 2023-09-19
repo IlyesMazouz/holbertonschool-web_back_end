@@ -1,4 +1,4 @@
-// switching variables in each function to const and let
+// switching var to const and let
 
 export function taskFirst() {
     const task = 'I prefer const when I can.';
@@ -15,4 +15,3 @@ export function taskFirst() {
   
     return combination;
   }
-  
