@@ -1,4 +1,4 @@
-export class HolbertonClass {
+class HolbertonClass {
   constructor(year, location) {
     this._year = year;
     this._location = location;
@@ -13,7 +13,7 @@ export class HolbertonClass {
   }
 }
 
-export class StudentHolberton {
+class StudentHolberton {
   constructor(firstName, lastName, holbertonClass) {
     this._firstName = firstName;
     this._lastName = lastName;
@@ -42,4 +42,12 @@ const student3 = new StudentHolberton('Albert', 'Clinton', class2019);
 const student4 = new StudentHolberton('Donald', 'Bush', class2019);
 const student5 = new StudentHolberton('Jason', 'Sandler', class2019);
 
-export const listOfStudents = [student1, student2, student3, student4, student5];
+export {listOfStudents};
+const listOfStudents = [student1, student2, student3, student4, student5];
+console.log(listOfStudents);
+
+const listPrinted = listOfStudents.map(
+  student => student.fullStudentDescription
+);
+
+console.log(listPrinted);
