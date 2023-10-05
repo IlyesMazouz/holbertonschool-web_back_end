@@ -1,13 +1,12 @@
 import signUpUser from './4-user-promise';
-
 import uploadPhoto from './5-photo-reject';
 
 export default async function handleProfileSignup(firstName, lastName, fileName) {
   const userPromise = {
-    status: 'pending'
+    status: 'pending',
   };
   const photoPromise = {
-    status: 'pending'
+    status: 'pending',
   };
   try {
     const userResult = await signUpUser(firstName, lastName);
