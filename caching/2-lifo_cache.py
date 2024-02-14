@@ -3,21 +3,24 @@
 
 from base_caching import BaseCaching
 
+
 class LIFOCache(BaseCaching):
     """LIFO caching system"""
 
     def __init__(self):
         """initialize"""
         super().__init__()
+        self.cache_queue = []
 
     def put(self, key, item):
         """add an item in the cache"""
         if key is not None and item is not None:
             if len(self.cache_data) >= self.MAX_ITEMS:
-                last_key = next(reversed(self.cache_data))
-                del self.cache_data[last_key]
-                print("DISCARD:", last_key)
+                discarded_key = self.cache_queue.pop(-1)
+                del self.cache_data[discarded_key]
+                print("DISCARD:", discarded_key)
             self.cache_data[key] = item
+            self.cache_queue.append(key)
 
     def get(self, key):
         """get an item by key"""
