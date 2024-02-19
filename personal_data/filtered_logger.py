@@ -1,5 +1,9 @@
 #!/usr/bin/env python3
 
+"""
+A module for providing a RedactingFormatter
+class for logging with sensitive data redacted
+"""
 import logging
 import re
 from typing import List
