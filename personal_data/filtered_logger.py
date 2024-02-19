@@ -1,9 +1,10 @@
-#!/usr/bin/env python3
-
 import logging
 import csv
 
-PII_FIELDS = ("name", "email", "phone_number", "address", "credit_card")
+PII_FIELDS = ("name", "email", "phone_number", "ssn", "password")
+"""
+PII_FIELDS constant containing the PII fields from user_data.csv
+"""
 
 
 class RedactingFormatter(logging.Formatter):
@@ -25,8 +26,7 @@ class RedactingFormatter(logging.Formatter):
 
     def format(self, record: logging.LogRecord) -> str:
         """
-        format a log record, redacting sensitive information.
-
+        format a log record, redacting sensitive information
         """
         message = super().format(record)
         for field in self.fields:
@@ -42,13 +42,16 @@ def get_logger() -> logging.Logger:
     """
     get a logger named "user_data" that logs up to logging.INFO level
     """
+    if len(PII_FIELDS) != 5:
+        raise ValueError("PII_FIELDS must have exactly 5 PII fields")
+
     logger = logging.getLogger("user_data")
     logger.setLevel(logging.INFO)
+
     handler = logging.StreamHandler()
     handler.setFormatter(RedactingFormatter(PII_FIELDS))
 
     logger.addHandler(handler)
-
     logger.propagate = False
 
     return logger
