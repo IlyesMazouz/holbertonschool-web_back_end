@@ -1,63 +1,38 @@
 #!/usr/bin/env python3
+
 """
-module for providing a RedactingFormatter class
-for logging with sensitive data redacted
+filtered_logger.py: A module for providing functions
+to handle logging and database connections securely
 """
 
 import logging
-import csv
-
-PII_FIELDS = ("name", "email", "phone_number", "ssn", "password")
-"""
-PII_FIELDS constant containing the PII fields from user_data.csv
-"""
+import mysql.connector
+import os
 
 
-class RedactingFormatter(logging.Formatter):
+def get_db() -> mysql.connector.connection.MySQLConnection:
     """
-    redacting Formatter class for logging
+    get a connector to the MySQL database using environment variables
     """
+    username = os.getenv("PERSONAL_DATA_DB_USERNAME", "root")
+    password = os.getenv("PERSONAL_DATA_DB_PASSWORD", "")
+    host = os.getenv("PERSONAL_DATA_DB_HOST", "localhost")
+    database = os.getenv("PERSONAL_DATA_DB_NAME")
 
-    REDACTION = "***"
-    SEPARATOR = ";"
-
-    def __init__(self, fields: tuple):
-        """
-        initialize the RedactingFormatter with a tuple of fields to redact
-        """
-        super().__init__(
-            "[HOLBERTON] %(name)s %(levelname)s %(asctime)-15s: %(message)s"
+    try:
+        db = mysql.connector.connect(
+            host=host, user=username, password=password, database=database
         )
-        self.fields = fields
-
-    def format(self, record: logging.LogRecord) -> str:
-        """
-        format a log record, redacting sensitive information
-        """
-        message = super().format(record)
-        for field in self.fields:
-            message = re.sub(
-                r"{}=[^{}]+".format(field, re.escape(self.SEPARATOR)),
-                "{}={}".format(field, self.REDACTION),
-                message,
-            )
-        return message
+        return db
+    except mysql.connector.Error as err:
+        print("Error connecting to MySQL database:", err)
 
 
-def get_logger() -> logging.Logger:
-    """
-    get a logger named "user_data" that logs up to logging.INFO level
-    """
-    if len(PII_FIELDS) != 5:
-        raise ValueError("PII_FIELDS must have exactly 5 PII fields")
-
-    logger = logging.getLogger("user_data")
-    logger.setLevel(logging.INFO)
-
-    handler = logging.StreamHandler()
-    handler.setFormatter(RedactingFormatter(PII_FIELDS))
-
-    logger.addHandler(handler)
-    logger.propagate = False
-
-    return logger
+if __name__ == "__main__":
+    db = get_db()
+    cursor = db.cursor()
+    cursor.execute("SELECT COUNT(*) FROM users;")
+    for row in cursor:
+        print(row[0])
+    cursor.close()
+    db.close()
