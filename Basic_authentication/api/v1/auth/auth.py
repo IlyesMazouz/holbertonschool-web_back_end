@@ -1,13 +1,15 @@
 #!/usr/bin/env python3
 """ Module containing the Auth class for API authentication """
-from typing import List
+from typing import List, TypeVar
 
 
 class Auth:
     """Auth class for managing API authentication"""
 
     def require_auth(self, path: str, excluded_paths: List[str]) -> bool:
-        """Method to check if authentication is required for a given path"""
+        """
+        Method to check if authentication is required for a given path
+        """
         if path is None:
             return True
 
@@ -20,9 +22,13 @@ class Auth:
         return path not in excluded_paths
 
     def authorization_header(self, request=None) -> str:
-        """Method to extract the authorization header from the request"""
+        """
+        Method to extract the authorization header from the request
+        """
         return None
 
     def current_user(self, request=None) -> TypeVar("User"):
-        """Method to retrieve the current authenticated user"""
+        """
+        Method to retrieve the current authenticated user
+        """
         return None
