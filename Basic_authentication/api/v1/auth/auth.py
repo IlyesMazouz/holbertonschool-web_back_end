@@ -1,15 +1,19 @@
 #!/usr/bin/env python3
-""" Module containing the Auth class for API authentication """
+"""
+Module containing the Auth class for API authentication
+"""
 from typing import List, TypeVar
 from flask import Request
 
 
 class Auth:
-    """Auth class for managing API authentication"""
+    """
+    Auth class for managing API authentication
+    """
 
     def require_auth(self, path: str, excluded_paths: List[str]) -> bool:
         """
-        Method to check if authentication is required for a given path
+        Check if authentication is required for a given path
         """
         if path is None:
             return True
@@ -24,7 +28,7 @@ class Auth:
 
     def authorization_header(self, request: Request = None) -> str:
         """
-        Method to extract the authorization header from the request
+        Extract the authorization header from the request
         """
         if request is None:
             return None
@@ -36,6 +40,6 @@ class Auth:
 
     def current_user(self, request: Request = None) -> TypeVar("User"):
         """
-        Method to retrieve the current authenticated user
+        Retrieve the current authenticated user
         """
         return None
