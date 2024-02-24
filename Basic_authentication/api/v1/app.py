@@ -4,8 +4,7 @@ Route module for the API
 """
 from os import getenv
 from api.v1.views import app_views
-from api.v1.auth.auth import Auth
-from flask import Flask, jsonify, abort, request
+from flask import Flask, jsonify, abort, request, make_response
 from flask_cors import CORS
 
 app = Flask(__name__)
@@ -14,7 +13,11 @@ CORS(app, resources={r"/api/v1/*": {"origins": "*"}})
 
 auth = None
 auth_type = getenv("AUTH_TYPE")
-if auth_type == "auth":
+if auth_type == "basic_auth":
+    from api.v1.auth.basic_auth import BasicAuth
+
+    auth = BasicAuth()
+else:
     from api.v1.auth.auth import Auth
 
     auth = Auth()
@@ -38,6 +41,12 @@ def before_request():
 
     if auth.current_user(request) is None:
         abort(make_response(jsonify({"error": "Forbidden"}), 403))
+
+
+@app.errorhandler(404)
+def not_found(error):
+    """Not found handler"""
+    return jsonify({"error": "Not found"}), 404
 
 
 if __name__ == "__main__":
