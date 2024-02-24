@@ -1,5 +1,7 @@
-# api/v1/auth/auth.py
-
+#!/usr/bin/env python3
+"""
+Module containing the Auth class for API authentication
+"""
 from typing import List
 
 
@@ -8,7 +10,7 @@ class Auth:
 
     def require_auth(self, path: str, excluded_paths: List[str]) -> bool:
         """
-        Method to check if authentication is required for a given path.
+        Method to check if authentication is required for a given path
         """
         if path is None:
             return True
