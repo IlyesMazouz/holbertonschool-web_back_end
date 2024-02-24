@@ -1,6 +1,7 @@
 #!/usr/bin/env python3
 """ Module containing the Auth class for API authentication """
 from typing import List, TypeVar
+from flask import Request
 
 
 class Auth:
@@ -21,13 +22,19 @@ class Auth:
 
         return path not in excluded_paths
 
-    def authorization_header(self, request=None) -> str:
+    def authorization_header(self, request: Request = None) -> str:
         """
         Method to extract the authorization header from the request
         """
-        return None
+        if request is None:
+            return None
 
-    def current_user(self, request=None) -> TypeVar("User"):
+        if "Authorization" not in request.headers:
+            return None
+
+        return request.headers["Authorization"]
+
+    def current_user(self, request: Request = None) -> TypeVar("User"):
         """
         Method to retrieve the current authenticated user
         """
