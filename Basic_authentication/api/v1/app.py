@@ -13,16 +13,17 @@ app.register_blueprint(app_views)
 CORS(app, resources={r"/api/v1/*": {"origins": "*"}})
 
 auth = None
+
 auth_type = getenv("AUTH_TYPE")
 if auth_type == "auth":
-    from api.v1.auth.auth import Auth
-
     auth = Auth()
 
 
 @app.before_request
 def before_request():
-    """Handler for processing requests before they are handled by any endpoint"""
+    """
+    Handler for before each request
+    """
     if auth is None:
         return
 
@@ -44,6 +45,18 @@ def before_request():
 def not_found(error):
     """Not found handler"""
     return jsonify({"error": "Not found"}), 404
+
+
+@app.errorhandler(401)
+def unauthorized(error):
+    """Unauthorized handler"""
+    return jsonify({"error": "Unauthorized"}), 401
+
+
+@app.errorhandler(403)
+def forbidden(error):
+    """Forbidden handler"""
+    return jsonify({"error": "Forbidden"}), 403
 
 
 if __name__ == "__main__":
