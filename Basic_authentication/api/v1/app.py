@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 """
-Route module for the API
+Main module for the API
 """
 from os import getenv
 from api.v1.views import app_views
@@ -22,6 +22,7 @@ if auth_type == "auth":
 
 @app.before_request
 def before_request():
+    """Handler for processing requests before they are handled by any endpoint"""
     if auth is None:
         return
 
