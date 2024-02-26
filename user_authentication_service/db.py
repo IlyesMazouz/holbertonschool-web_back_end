@@ -11,7 +11,6 @@ from sqlalchemy.orm.exc import NoResultFound
 
 from user import Base, User
 
-
 class DB:
     """DB class"""
 
@@ -46,24 +45,30 @@ class DB:
         except InvalidRequestError:
             raise
 
+    def update_user(self, user_id: int, **kwargs) -> None:
+        """Update a user's attributes"""
+        try:
+            user = self.find_user_by(id=user_id)
+            for key, value in kwargs.items():
+                if hasattr(user, key):
+                    setattr(user, key, value)
+                else:
+                    raise ValueError(f"Attribute '{key}' is not a valid user attribute")
+            self._session.commit()
+        except NoResultFound:
+            raise
 
 if __name__ == "__main__":
     my_db = DB()
 
-    user = my_db.add_user("test@test.com", "PwdHashed")
+    email = 'test@test.com'
+    hashed_password = "hashedPwd"
+
+    user = my_db.add_user(email, hashed_password)
     print(user.id)
 
-    find_user = my_db.find_user_by(email="test@test.com")
-    print(find_user.id)
-
     try:
-        find_user = my_db.find_user_by(email="test2@test.com")
-        print(find_user.id)
-    except NoResultFound:
-        print("Not found")
-
-    try:
-        find_user = my_db.find_user_by(no_email="test@test.com")
-        print(find_user.id)
-    except InvalidRequestError:
-        print("Invalid")
+        my_db.update_user(user.id, hashed_password='NewPwd')
+        print("Password updated")
+    except ValueError:
+        print("Error")
