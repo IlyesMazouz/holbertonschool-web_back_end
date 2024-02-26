@@ -11,6 +11,7 @@ from sqlalchemy.orm.exc import NoResultFound
 
 from user import Base, User
 
+
 class DB:
     """DB class"""
 
@@ -58,17 +59,18 @@ class DB:
         except NoResultFound:
             raise
 
+
 if __name__ == "__main__":
     my_db = DB()
 
-    email = 'test@test.com'
+    email = "test@test.com"
     hashed_password = "hashedPwd"
 
     user = my_db.add_user(email, hashed_password)
     print(user.id)
 
     try:
-        my_db.update_user(user.id, hashed_password='NewPwd')
+        my_db.update_user(user.id, hashed_password="NewPwd")
         print("Password updated")
     except ValueError:
         print("Error")
