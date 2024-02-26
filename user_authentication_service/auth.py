@@ -1,10 +1,11 @@
 """Auth module
 """
+
 from db import DB
 
+
 class Auth:
-    """Auth class to interact with the authentication database.
-    """
+    """Auth class to interact with the authentication database."""
 
     def __init__(self):
         self._db = DB()
@@ -21,9 +22,11 @@ class Auth:
         user = self._db.add_user(email, hashed_password)
         return user
 
+
 def _hash_password(password: str) -> bytes:
     """Hashes a password using bcrypt"""
     import bcrypt
+
     salt = bcrypt.gensalt()
-    hashed_password = bcrypt.hashpw(password.encode('utf-8'), salt)
+    hashed_password = bcrypt.hashpw(password.encode("utf-8"), salt)
     return hashed_password
