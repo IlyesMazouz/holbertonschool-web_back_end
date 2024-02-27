@@ -4,7 +4,8 @@
 
 from db import DB
 import bcrypt
-import uuid  
+import uuid
+
 
 class Auth:
     """Auth class to interact with the authentication database"""
@@ -36,4 +37,4 @@ class Auth:
 
     def _generate_uuid(self) -> str:
         """Generate a new UUID"""
-        return str(uuid.uuid4())  
+        return str(uuid.uuid4())
