@@ -2,6 +2,7 @@
 """
 Module containing the BasicAuth class for Basic Authentication
 """
+import base64
 from typing import TypeVar
 
 
@@ -39,6 +40,24 @@ class BasicAuth:
             return None
 
         return authorization_header.split(" ")[1]
+
+    def decode_base64_authorization_header(
+        self, base64_authorization_header: str
+    ) -> str:
+        """
+        Decode the Base64 string and return the decoded value as UTF8 string
+        """
+        if base64_authorization_header is None or not isinstance(
+            base64_authorization_header, str
+        ):
+            return None
+
+        try:
+            decoded_bytes = base64.b64decode(base64_authorization_header)
+            decoded_string = decoded_bytes.decode("utf-8")
+            return decoded_string
+        except Exception:
+            return None
 
 
 if __name__ == "__main__":
