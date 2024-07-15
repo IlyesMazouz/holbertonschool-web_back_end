@@ -2,8 +2,6 @@ Learning Objectives:
 
 At the end of this project, you are expected to be able to explain to anyone, without the help of Google:
 
-How to write an asynchronous generator
+The difference between unit and integration tests
 
-How to use async comprehensions
-
-How to type-annotate generators
+Common testing patterns such as mocking, parametrizations and fixtures

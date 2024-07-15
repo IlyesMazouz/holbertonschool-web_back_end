@@ -2,8 +2,14 @@ Learning Objectives:
 
 At the end of this project, you are expected to be able to explain to anyone, without the help of Google:
 
-How to write an asynchronous generator
+General:
 
-How to use async comprehensions
+What authentication means
 
-How to type-annotate generators
+What session authentication means
+
+What Cookies are
+
+How to send Cookies
+
+How to parse Cookies
