@@ -1,34 +1,39 @@
 #!/usr/bin/env python3
 """
-Module for user registration with Flask.
+Flask application for user authentication.
 """
-from flask import Flask, request, jsonify
+from flask import Flask, request, jsonify, abort, make_response
 from auth import Auth
-
-AUTH = Auth()
+import uuid
 
 app = Flask(__name__)
 
+auth = Auth()
 
-@app.route("/users", methods=["POST"])
-def users():
+
+@app.route("/sessions", methods=["POST"])
+def login():
     """
-    Endpoint to register a new user.
+    Handles user login, creates a session, and sets a session cookie.
     """
     email = request.form.get("email")
     password = request.form.get("password")
 
     if not email or not password:
-        return jsonify({"message": "email and password required"}), 400
+        abort(400, description="Missing email or password")
 
-    try:
-        user = AUTH.register_user(email, password)
-        return jsonify({"email": user.email, "message": "user created"}), 200
-    except ValueError:
-        return jsonify({"message": "email already registered"}), 400
-    except Exception as e:
-        return jsonify({"message": str(e)}), 500
+    user = auth.valid_login(email, password)
+
+    if user is None:
+        abort(401, description="Unauthorized")
+
+    session_id = auth.create_session(email)
+
+    response = make_response(jsonify({"email": email, "message": "logged in"}))
+    response.set_cookie("session_id", session_id)
+
+    return response
 
 
 if __name__ == "__main__":
-    app.run(host="0.0.0.0", port=5000, debug=False)
+    app.run(host="0.0.0.0", port="5000")
