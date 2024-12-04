@@ -1,39 +1,45 @@
 #!/usr/bin/env python3
 """
-Flask application for user authentication.
+Main API file that includes the routes and handlers for user authentication.
 """
-from flask import Flask, request, jsonify, abort, make_response
+
+from flask import Flask, request, redirect, jsonify, abort
+from models.user import User
 from auth import Auth
-import uuid
 
 app = Flask(__name__)
 
 auth = Auth()
 
 
-@app.route("/sessions", methods=["POST"])
-def login():
+@app.route("/sessions", methods=["DELETE"])
+def logout():
     """
-    Handles user login, creates a session, and sets a session cookie.
+    Logs out the user by destroying their session.
+    Expects the session_id as a cookie in the request.
     """
-    email = request.form.get("email")
-    password = request.form.get("password")
+    session_id = request.cookies.get("session_id")
 
-    if not email or not password:
-        abort(400, description="Missing email or password")
+    if not session_id:
+        abort(403)
 
-    user = auth.valid_login(email, password)
+    user = auth.get_user_from_session_id(session_id)
 
     if user is None:
-        abort(401, description="Unauthorized")
+        abort(403)
 
-    session_id = auth.create_session(email)
+    auth.destroy_session(user.id)
 
-    response = make_response(jsonify({"email": email, "message": "logged in"}))
-    response.set_cookie("session_id", session_id)
+    return redirect("/")
 
-    return response
+
+@app.route("/")
+def home():
+    """
+    Home route (GET /), could be used for a landing page or a check.
+    """
+    return "Welcome to the Home Page", 200
 
 
 if __name__ == "__main__":
-    app.run(host="0.0.0.0", port="5000")
+    app.run(host="0.0.0.0", port=5000)
