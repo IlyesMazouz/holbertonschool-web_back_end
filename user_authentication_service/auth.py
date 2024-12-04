@@ -1,6 +1,7 @@
 #!/usr/bin/env python3
 """
-Auth module for handling user authentication logic.
+Auth class for handling user authentication logic.
+
 """
 
 import uuid
@@ -23,14 +24,14 @@ class Auth:
         Registers a new user by email and password.
 
         """
-        user_id = self._generate_uuid()
+        user_id = self._generate_uuid() 
         hashed_password = bcrypt.hashpw(password.encode("utf-8"), bcrypt.gensalt())
 
         return user_id
 
     def valid_login(self, email: str, password: str) -> bool:
         """
-        Validates the login credentials for a user
+        Validates the login credentials for a user.
         """
         stored_password_hash = b"$2b$12$somehashedpasswordhere"
 
