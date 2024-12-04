@@ -4,6 +4,7 @@ Authentication module for the API
 """
 from flask import request
 from typing import List, TypeVar
+import base64
 
 
 class Auth:
@@ -15,7 +16,6 @@ class Auth:
             return True
 
         for excluded_path in excluded_paths:
-            # Split the long line into two for readability
             path_stripped = excluded_path.rstrip("/")
             if path == excluded_path or path.startswith(path_stripped):
                 return False
@@ -48,3 +48,17 @@ class BasicAuth(Auth):
             return None
 
         return authorization_header[6:]
+
+    def decode_base64_authorization_header(
+        self, base64_authorization_header: str
+    ) -> str:
+        """Decodes the Base64 string."""
+        if base64_authorization_header is None:
+            return None
+        if not isinstance(base64_authorization_header, str):
+            return None
+        try:
+            decoded_bytes = base64.b64decode(base64_authorization_header)
+            return decoded_bytes.decode("utf-8")
+        except (base64.binascii.Error, UnicodeDecodeError):
+            return None
