@@ -30,8 +30,31 @@ class Auth:
         return request.headers.get("Authorization")
 
     def current_user(self, request=None) -> TypeVar("User"):
-        """Gets the current user (to be implemented in child classes)."""
-        return None
+        """Retrieves the current user from the request based on Basic Auth."""
+        authorization_header = self.authorization_header(request)
+        if authorization_header is None:
+            return None
+
+        base64_authorization_header = self.extract_base64_authorization_header(
+            authorization_header
+        )
+        if base64_authorization_header is None:
+            return None
+
+        decoded_base64_authorization_header = self.decode_base64_authorization_header(
+            base64_authorization_header
+        )
+        if decoded_base64_authorization_header is None:
+            return None
+
+        user_email, user_pwd = self.extract_user_credentials(
+            decoded_base64_authorization_header
+        )
+        if user_email is None or user_pwd is None:
+            return None
+
+        user = self.user_object_from_credentials(user_email, user_pwd)
+        return user
 
 
 class BasicAuth(Auth):
@@ -67,8 +90,7 @@ class BasicAuth(Auth):
     def extract_user_credentials(
         self, decoded_base64_authorization_header: str
     ) -> (str, str):
-        """Extracts the user email and password from
-        the decoded Base64 string."""
+        """Extracts the user email and password from the decoded Base64 string."""
         if decoded_base64_authorization_header is None:
             return None, None
         if not isinstance(decoded_base64_authorization_header, str):
