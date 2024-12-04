@@ -1,40 +1,61 @@
 #!/usr/bin/env python3
 """
 Auth class for handling user authentication logic.
+
 """
+
+import uuid
 import bcrypt
 
 
 class Auth:
+    """
+    Auth class handles user authentication related functions.
+    """
+
     def __init__(self):
         """
-        Initializes the Auth class with an empty user database.
-        In a real application, this would interact with a database.
+        Initialize an Auth object with a simple user storage.
+        This would typically interface with a database.
         """
         self.users = {}
 
+    def _generate_uuid(self) -> str:
+        """
+        Generate a new UUID and return its string representation.
+
+        """
+        return str(uuid.uuid4())
+
     def register_user(self, email: str, password: str) -> None:
         """
-        Registers a new user by email and password.
-        Password is hashed before storing.
+        Register a new user with email and password.
+
         """
         if email in self.users:
             raise ValueError("User already exists")
 
         hashed_password = bcrypt.hashpw(password.encode("utf-8"), bcrypt.gensalt())
-        self.users[email] = hashed_password
+        user_id = self._generate_uuid()
+
+        self.users[email] = {"id": user_id, "password": hashed_password}
 
     def valid_login(self, email: str, password: str) -> bool:
         """
-        Validates login credentials.
-        Returns True if the email exists and the
-        password is correct, otherwise False.
+        Validates the login for a given email and password.
+
         """
         if email not in self.users:
             return False
 
-        stored_password_hash = self.users[email]
+        stored_password = self.users[email]["password"]
+        return bcrypt.checkpw(password.encode("utf-8"), stored_password)
 
-        if bcrypt.checkpw(password.encode("utf-8"), stored_password_hash):
-            return True
-        return False
+    def get_user_id(self, email: str) -> str:
+        """
+        Retrieves the user ID for the given email.
+
+        """
+        if email in self.users:
+            return self.users[email]["id"]
+        return None
