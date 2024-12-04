@@ -15,13 +15,13 @@ def users():
     """
     Endpoint to register a new user.
     """
+    email = request.form.get("email")
+    password = request.form.get("password")
+
+    if not email or not password:
+        return jsonify({"message": "email and password required"}), 400
+
     try:
-        email = request.form.get("email")
-        password = request.form.get("password")
-
-        if not email or not password:
-            return jsonify({"message": "email and password required"}), 400
-
         user = AUTH.register_user(email, password)
         return jsonify({"email": user.email, "message": "user created"}), 200
     except ValueError:
