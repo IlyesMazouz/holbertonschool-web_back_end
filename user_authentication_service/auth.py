@@ -1,58 +1,62 @@
 #!/usr/bin/env python3
 """
 Auth class for handling user authentication logic.
-
 """
-
-import uuid
-import bcrypt
+from uuid import uuid4
+from typing import Type
+from models.user import User
+from models.base import Base
+from sqlalchemy.orm.exc import NoResultFound
+from sqlalchemy.orm import Session
 
 
 class Auth:
+    """
+    Auth class to manage user authentication.
+    """
+
     def __init__(self):
-        """Initializes the Auth class."""
-        self._db = {}
+        """
+        Initialize the Auth class.
+        """
+        self._db = Base.session
 
     def _generate_uuid(self) -> str:
         """
-        Generate a new UUID and return it as a string.
+        Generate a new UUID.
         """
-        return str(uuid.uuid4())
-
-    def register_user(self, email: str, password: str) -> str:
-        """
-        Registers a new user by email and password.
-        """
-        user_id = self._generate_uuid()
-        hashed_password = bcrypt.hashpw(password.encode("utf-8"), bcrypt.gensalt())
-
-        self._db[email] = {
-            "user_id": user_id,
-            "password": hashed_password,
-            "session_id": None,
-        }
-
-        return user_id
-
-    def valid_login(self, email: str, password: str) -> bool:
-        """
-        Validates the login credentials for a user.
-        """
-        if email not in self._db:
-            return False
-
-        stored_password_hash = self._db[email]["password"]
-        return bcrypt.checkpw(password.encode("utf-8"), stored_password_hash)
+        return str(uuid4())
 
     def create_session(self, email: str) -> str:
         """
-        Creates a session for the user by generating a new session ID.
+        Create a session for the user based on email.
         """
-        if email not in self._db:
+        user = self._db.query(User).filter_by(email=email).first()
+        if user:
+            session_id = self._generate_uuid()
+            user.session_id = session_id
+            self._db.commit()
+            return session_id
+        return None
+
+    def get_user_from_session_id(self, session_id: str) -> Type[User]:
+        """
+        Returns the user corresponding to the session_id, or None if not found.
+        """
+        if not session_id:
             return None
 
-        session_id = self._generate_uuid()
+        try:
+            user = self._db.query(User).filter_by(session_id=session_id).one()
+            return user
+        except NoResultFound:
+            return None
 
-        self._db[email]["session_id"] = session_id
-
-        return session_id
+    def valid_login(self, email: str, password: str) -> Type[User]:
+        """
+        Validate login credentials.
+        """
+        user = self._db.query(User).filter_by(email=email).first()
+        if user and user.password == password:
+            return user
+        return None
