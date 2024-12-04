@@ -33,10 +33,8 @@ class DB:
     def add_user(self, email: str, hashed_password: str) -> User:
         """Add a new user to the database"""
         user = User(email=email, hashed_password=hashed_password)
-
         self._session.add(user)
         self._session.commit()
-
         return user
 
     def find_user_by(self, **kwargs) -> User:
@@ -48,3 +46,15 @@ class DB:
             raise NoResultFound("No user found with the provided criteria.")
         except Exception as e:
             raise InvalidRequestError(f"Invalid query arguments: {str(e)}")
+
+    def update_user(self, user_id: int, **kwargs) -> None:
+        """Update a user's attributes in the database"""
+        user = self.find_user_by(id=user_id)
+
+        for key, value in kwargs.items():
+            if hasattr(user, key):
+                setattr(user, key, value)
+            else:
+                raise ValueError(f"Invalid attribute '{key}' for user.")
+
+        self._session.commit()
