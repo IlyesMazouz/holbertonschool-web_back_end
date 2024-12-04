@@ -1,38 +1,40 @@
 #!/usr/bin/env python3
-
-from sqlalchemy import create_engine
-from sqlalchemy.ext.declarative import declarative_base
+"""
+DB class for handling database operations
+"""
+from sqlalchemy.orm.exc import NoResultFound
+from sqlalchemy.exc import InvalidRequestError
 from sqlalchemy.orm import sessionmaker
-from sqlalchemy.orm.session import Session
-from user import User, Base
+from sqlalchemy import create_engine
+from user import User
 
 
 class DB:
-    """DB class"""
+    """
+    DB class for handling user authentication and database operations
+    """
 
-    def __init__(self) -> None:
-        """Initialize a new DB instance"""
-        self._engine = create_engine(
-            "sqlite:///a.db", echo=False
-        )
-        Base.metadata.drop_all(self._engine)
-        Base.metadata.create_all(self._engine)
-        self.__session = None
+    def __init__(self):
+        """Initialize the DB class"""
+        self.engine = create_engine("sqlite:///users.db")
+        self.Session = sessionmaker(bind=self.engine)
+        self.session = self.Session()
 
-    @property
-    def _session(self) -> Session:
-        """Memoized session object"""
-        if self.__session is None:
-            DBSession = sessionmaker(bind=self._engine)
-            self.__session = DBSession()
-        return self.__session
+        User.__table__.create(self.engine, checkfirst=True)
 
-    def add_user(self, email: str, hashed_password: str) -> User:
-        """Adds a new user to the database"""
+    def add_user(self, email: str, hashed_password: str):
+        """Add a new user to the database"""
         new_user = User(email=email, hashed_password=hashed_password)
-
-        self._session.add(new_user)
-
-        self._session.commit()
-
+        self.session.add(new_user)
+        self.session.commit()
         return new_user
+
+    def find_user_by(self, **kwargs):
+        """Find user by arbitrary keyword arguments"""
+        try:
+            user = self.session.query(User).filter_by(**kwargs).one()
+            return user
+        except NoResultFound:
+            raise NoResultFound("User not found")
+        except InvalidRequestError:
+            raise InvalidRequestError("Invalid query arguments")
