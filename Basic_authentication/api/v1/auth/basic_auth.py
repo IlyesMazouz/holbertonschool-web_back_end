@@ -15,7 +15,9 @@ class Auth:
             return True
 
         for excluded_path in excluded_paths:
-            if path == excluded_path or path.startswith(excluded_path.rstrip('/')): 
+            # Split the long line into two for readability
+            path_stripped = excluded_path.rstrip("/")
+            if path == excluded_path or path.startswith(path_stripped):
                 return False
 
         return True
@@ -26,15 +28,17 @@ class Auth:
             return None
         return request.headers.get("Authorization")
 
-    def current_user(self, request=None) -> TypeVar('User'):
+    def current_user(self, request=None) -> TypeVar("User"):
         """Gets the current user (to be implemented in child classes)."""
         return None
 
 
 class BasicAuth(Auth):
-    """BasicAuth class for handling Basic Authentication."""
+    """BasicAuth class to handle Basic Authentication."""
 
-    def extract_base64_authorization_header(self, authorization_header: str) -> str:
+    def extract_base64_authorization_header(
+        self, authorization_header: str
+    ) -> str:
         """Extracts the Base64 part of the Authorization header."""
         if authorization_header is None:
             return None
@@ -42,4 +46,5 @@ class BasicAuth(Auth):
             return None
         if not authorization_header.startswith("Basic "):
             return None
+
         return authorization_header[6:]
