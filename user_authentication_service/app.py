@@ -1,25 +1,17 @@
 #!/usr/bin/env python3
 """
-app.py
+Flask app to return a simple JSON response
 """
-from flask import Flask, request, jsonify
-from auth import Auth
+
+from flask import Flask, jsonify
 
 app = Flask(__name__)
 
-AUTH = Auth()
 
-
-@app.route("/users", methods=["POST"])
-def register_user():
-    """Endpoint to register a new user"""
-    try:
-        email = request.form.get("email")
-        password = request.form.get("password")
-        user = AUTH.register_user(email, password)
-        return jsonify({"email": user.email, "message": "user created"}), 200
-    except ValueError as err:
-        return jsonify({"message": str(err)}), 400
+@app.route("/", methods=["GET"])
+def welcome():
+    """Route to return a welcome message"""
+    return jsonify({"message": "Bienvenue"})
 
 
 if __name__ == "__main__":
