@@ -1,84 +1,86 @@
 #!/usr/bin/env python3
 """
-Auth class for handling user authentication logic.
+Auth module to handle user authentication logic.
 """
 
+import uuid
 from models.user import User
 from models.base import Base
 from sqlalchemy.orm.exc import NoResultFound
-from uuid import uuid4
-from typing import Type, Union
-from sqlalchemy.orm.session import Session
 
 
 class Auth:
     """
-    Auth class to manage user authentication.
+    Auth class to manage user authentication,
+    session handling, and password reset.
     """
 
     def __init__(self):
-        """
-        Initialize the Auth class with a session.
-        """
-        self._db = Session()
+        """Initializes the Auth object with the database session."""
+        self._db = Base()
 
-    def _generate_uuid(self) -> str:
+    def get_user_from_session_id(self, session_id: str):
         """
-        Generate a new UUID for the session.
+        Retrieves the user from the session ID.
         """
-        return str(uuid4())
-
-    def register_user(self, email: str, password: str) -> User:
-        """
-        Register a new user in the system.
-        """
-        user = User(email=email, password=password)
-        self._db.add(user)
-        self._db.commit()
-        return user
-
-    def create_session(self, email: str) -> Union[str, None]:
-        """
-        Create a session for a given user by email.
-        """
-        user = self._db.query(User).filter_by(email=email).first()
-        if not user:
+        if session_id is None:
             return None
-        session_id = self._generate_uuid()
-        user.session_id = session_id
-        self._db.commit()
-        return session_id
 
-    def get_user_from_session_id(self, session_id: str) -> Union[User, None]:
-        """
-        Return the user associated with the given session ID.
-        """
-        if not session_id:
-            return None
-        user = self._db.query(User).filter_by(session_id=session_id).first()
-        return user
-
-    def destroy_session(self, user_id: int) -> None:
-        """
-        Destroys the session for the user by setting session_id to None.
-        """
         try:
-            user = self._db.query(User).filter_by(id=user_id).one()
-
-            user.session_id = None
-
-            self._db.commit()
+            user = self._db.session.query(User).filter_by(session_id=session_id).one()
         except NoResultFound:
             return None
 
-    def login(self, email: str, password: str) -> Union[dict, None]:
+        return user
+
+    def create_session(self, user_id: int):
         """
-        Login a user by email and password.
+        Creates a session for the user and returns the session ID.
         """
-        user = self._db.query(User).filter_by(email=email).first()
-        if not user or user.password != password:
-            return None
-        session_id = self.create_session(email)
-        if not session_id:
-            return None
-        return {"email": email, "message": "logged in"}
+        session_id = str(uuid.uuid4())
+        user = self._db.session.query(User).filter_by(id=user_id).one()
+        user.session_id = session_id
+        self._db.session.commit()
+
+        return session_id
+
+    def destroy_session(self, user_id: int):
+        """
+        Destroys the session of the user.
+        """
+        user = self._db.session.query(User).filter_by(id=user_id).one()
+        user.session_id = None
+        self._db.session.commit()
+
+    def get_reset_password_token(self, email: str) -> str:
+        """
+        Generates and returns a reset password token for the user with the provided email.
+        If the user does not exist, raises a ValueError.
+        """
+        user = self._db.session.query(User).filter_by(email=email).one_or_none()
+
+        if user is None:
+            raise ValueError("User not found")
+
+        reset_token = str(uuid.uuid4())
+        user.reset_token = reset_token
+        self._db.session.commit()
+
+        return reset_token
+
+    def reset_password(self, reset_token: str, new_password: str) -> None:
+        """
+        Resets the user's password using the reset token.
+        """
+        user = (
+            self._db.session.query(User)
+            .filter_by(reset_token=reset_token)
+            .one_or_none()
+        )
+
+        if user is None:
+            raise ValueError("Invalid reset token")
+
+        user.password = new_password
+        user.reset_token = None
+        self._db.session.commit()
