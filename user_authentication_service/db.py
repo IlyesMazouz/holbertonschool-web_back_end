@@ -1,40 +1,50 @@
 #!/usr/bin/env python3
 """
-DB class for handling database operations
+DB module
 """
-from sqlalchemy.orm.exc import NoResultFound
-from sqlalchemy.exc import InvalidRequestError
-from sqlalchemy.orm import sessionmaker
 from sqlalchemy import create_engine
-from user import User
+from sqlalchemy.ext.declarative import declarative_base
+from sqlalchemy.orm import sessionmaker
+from sqlalchemy.orm.session import Session
+from sqlalchemy.exc import InvalidRequestError
+from sqlalchemy.orm.exc import NoResultFound
+
+from user import User, Base
 
 
 class DB:
-    """
-    DB class for handling user authentication and database operations
-    """
+    """DB class"""
 
-    def __init__(self):
-        """Initialize the DB class"""
-        self.engine = create_engine("sqlite:///users.db")
-        self.Session = sessionmaker(bind=self.engine)
-        self.session = self.Session()
+    def __init__(self) -> None:
+        """Initialize a new DB instance"""
+        self._engine = create_engine("sqlite:///a.db", echo=False)
+        Base.metadata.drop_all(self._engine)
+        Base.metadata.create_all(self._engine)
+        self.__session = None
 
-        User.__table__.create(self.engine, checkfirst=True)
+    @property
+    def _session(self) -> Session:
+        """Memoized session object"""
+        if self.__session is None:
+            DBSession = sessionmaker(bind=self._engine)
+            self.__session = DBSession()
+        return self.__session
 
-    def add_user(self, email: str, hashed_password: str):
+    def add_user(self, email: str, hashed_password: str) -> User:
         """Add a new user to the database"""
-        new_user = User(email=email, hashed_password=hashed_password)
-        self.session.add(new_user)
-        self.session.commit()
-        return new_user
+        user = User(email=email, hashed_password=hashed_password)
 
-    def find_user_by(self, **kwargs):
-        """Find user by arbitrary keyword arguments"""
+        self._session.add(user)
+        self._session.commit()
+
+        return user
+
+    def find_user_by(self, **kwargs) -> User:
+        """Find a user by arbitrary keyword arguments"""
         try:
-            user = self.session.query(User).filter_by(**kwargs).one()
+            user = self._session.query(User).filter_by(**kwargs).one()
             return user
         except NoResultFound:
-            raise NoResultFound("User not found")
-        except InvalidRequestError:
-            raise InvalidRequestError("Invalid query arguments")
+            raise NoResultFound("No user found with the provided criteria.")
+        except Exception as e:
+            raise InvalidRequestError(f"Invalid query arguments: {str(e)}")
