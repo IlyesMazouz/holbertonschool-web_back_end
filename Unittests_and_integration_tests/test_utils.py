@@ -1,32 +1,47 @@
 #!/usr/bin/env python3
 """
-Unit tests for utils.get_json.
+Unit tests for utils.memoize.
 """
 
 import unittest
-from unittest.mock import patch, Mock
-from parameterized import parameterized
-from utils import get_json
+from unittest.mock import patch, MagicMock
+from utils import memoize
 
 
-class TestGetJson(unittest.TestCase):
+class TestMemoize(unittest.TestCase):
     """
-    TestGetJson class for testing the get_json function.
+    TestMemoize class for testing the memoize decorator.
     """
 
-    @parameterized.expand([
-        ("http://example.com", {"payload": True}),
-        ("http://holberton.io", {"payload": False}),
-    ])
-    @patch("utils.requests.get")
-    def test_get_json(self, test_url: str, test_payload: dict, mock_get: Mock):
+    def test_memoize(self):
         """
-        Test get_json with mocked requests.get.
+        Test the memoize decorator.
         """
-        mock_response = Mock()
-        mock_response.json.return_value = test_payload
-        mock_get.return_value = mock_response
 
-        self.assertEqual(get_json(test_url), test_payload)
+        class TestClass:
+            """
+            A test class to validate the memoize decorator.
+            """
 
-        mock_get.assert_called_once_with(test_url)
+            def a_method(self):
+                """
+                A method that returns a constant value.
+                """
+                return 42
+
+            @memoize
+            def a_property(self):
+                """
+                A memoized property that calls a_method.
+                """
+                return self.a_method()
+
+        patcher = patch.object(TestClass, "a_method", return_value=42)
+        with patcher as mock_method:
+            test_instance = TestClass()
+
+            self.assertEqual(test_instance.a_property, 42)
+
+            self.assertEqual(test_instance.a_property, 42)
+
+            mock_method.assert_called_once()
