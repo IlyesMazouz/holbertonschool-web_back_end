@@ -1,39 +1,82 @@
 #!/usr/bin/env python3
 """
-Unit tests for client.GithubOrgClient.
+Integration tests for client.GithubOrgClient.
 """
 
 import unittest
 from unittest.mock import patch
-from parameterized import parameterized
+from parameterized import parameterized_class
+import requests
 from client import GithubOrgClient
+from fixtures import org_payload, repos_payload, expected_repos, apache2_repos
 
 
-class TestGithubOrgClient(unittest.TestCase):
+@parameterized_class(
+    [
+        {
+            "org_payload": org_payload,
+            "repos_payload": repos_payload,
+            "expected_repos": expected_repos,
+            "apache2_repos": apache2_repos,
+        }
+    ]
+)
+class TestIntegrationGithubOrgClient(unittest.TestCase):
     """
-    TestGithubOrgClient class for testing the GithubOrgClient class.
+    Integration test for GithubOrgClient.public_repos method, with external requests mocked.
     """
 
-    @parameterized.expand(
-        [
-            ({"license": {"key": "my_license"}}, "my_license", True),
-            ({"license": {"key": "other_license"}}, "my_license", False),
-        ]
-    )
-    @patch("client.GithubOrgClient.get_json")
-    def test_has_license(self, repo, license_key, expected_result, mock_get_json):
+    @classmethod
+    def setUpClass(cls):
         """
-        Test that has_license returns the expected
-        result based on the repository's license.
+        Set up class method to mock requests.get and return mock data for testing.
         """
-        mock_get_json.return_value = [repo]
+        cls.get_patcher = patch("requests.get")
+        cls.mock_get = cls.get_patcher.start()
 
+        cls.mock_get.side_effect = cls.mock_requests_get
+
+    @classmethod
+    def tearDownClass(cls):
+        """
+        Tear down class method to stop the patcher after tests are run.
+        """
+        cls.get_patcher.stop()
+
+    @staticmethod
+    def mock_requests_get(url, *args, **kwargs):
+        """
+        Side effect function for mocking requests.get calls.
+        It will return different payloads based on the URL.
+        """
+        if url == "https://api.github.com/orgs/org_name":
+            return MockResponse(org_payload)
+        elif url == "https://api.github.com/orgs/org_name/repos":
+            return MockResponse(repos_payload)
+        else:
+            raise ValueError(f"Unexpected URL: {url}")
+
+    def test_public_repos(self):
+        """
+        Test that the public_repos method returns the expected list of repos.
+        """
         client = GithubOrgClient("org_name")
+        repos = client.public_repos()
 
-        has_license = client.has_license(license_key)
+        self.assertEqual(repos, expected_repos)
 
-        self.assertEqual(has_license, expected_result)
+        self.mock_get.assert_called_with("https://api.github.com/orgs/org_name")
+        self.mock_get.assert_called_with("https://api.github.com/orgs/org_name/repos")
 
-        mock_get_json.assert_called_once_with(
-            "https://api.github.com/orgs/org_name/repos"
-        )
+
+class MockResponse:
+    """
+    Mock class for simulating a Response object returned by requests.get().
+    It provides a json() method that returns the mock payload.
+    """
+
+    def __init__(self, json_data):
+        self.json_data = json_data
+
+    def json(self):
+        return self.json_data
