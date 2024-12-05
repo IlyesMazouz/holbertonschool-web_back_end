@@ -21,8 +21,7 @@ class TestGithubOrgClient(unittest.TestCase):
     )
     def test_public_repos(self, mock_public_repos_url, mock_get_json):
         """
-        Test that public_repos returns the expected
-        list of repos based on the mocked payload.
+        Test that public_repos returns the expected list of repos based on the mocked payload.
         """
         mock_get_json.return_value = [{"name": "repo1"}, {"name": "repo2"}]
 
