@@ -1,0 +1,18 @@
+<!DOCTYPE html>
+<html lang="{{ g.get('locale', 'en') }}">
+<head>
+    <meta charset="UTF-8">
+    <title>{{ _('Welcome to the app') }}</title>
+</head>
+<body>
+    <h1>{{ _('Welcome to the app') }}</h1>
+    <p>
+        {% if g.user %}
+            {{ _('You are logged in as %(username)s.', username=g.user['name']) }}
+        {% else %}
+            {{ _('You are not logged in.') }}
+        {% endif %}
+    </p>
+    <p>{{ _('Current Timezone: ') }}{{ g.get('timezone', 'UTC') }}</p>
+</body>
+</html>
