@@ -5,14 +5,16 @@ A Flask app with Flask-Babel for internationalization (i18n).
 from flask import Flask, render_template, request
 from flask_babel import Babel, _
 
-# Instantiate Babel
 babel = Babel()
+
 
 class Config:
     """App configuration class."""
+
     LANGUAGES = ["en", "fr"]
-    BABEL_DEFAULT_LOCALE = 'en'
-    BABEL_DEFAULT_TIMEZONE = 'UTC'
+    BABEL_DEFAULT_LOCALE = "en"
+    BABEL_DEFAULT_TIMEZONE = "UTC"
+
 
 def get_locale():
     """
@@ -23,14 +25,14 @@ def get_locale():
     """
     return request.accept_languages.best_match(Config.LANGUAGES)
 
-# Initialize Flask app
+
 app = Flask(__name__)
 app.config.from_object(Config)
 
-# Initialize Babel with custom locale selector
 babel.init_app(app, locale_selector=get_locale)
 
-@app.route('/')
+
+@app.route("/")
 def index():
     """
     Render the index page with translations.
@@ -38,7 +40,7 @@ def index():
     Returns:
         str: Rendered HTML template.
     """
-    return render_template('3-index.html')
+    return render_template("3-index.html")
 
 
 if __name__ == "__main__":
