@@ -3,6 +3,7 @@
 Module containing the Auth class for API authentication
 """
 from typing import List
+import os
 
 
 class Auth:
@@ -36,3 +37,14 @@ class Auth:
         Method to retrieve the current authenticated user
         """
         return None
+
+    def session_cookie(self, request=None):
+        """
+        Method to retrieve the session cookie from the request
+        """
+        if request is None:
+            return None
+        session_name = os.getenv("SESSION_NAME")
+        if session_name is None:
+            return None
+        return request.cookies.get(session_name)
