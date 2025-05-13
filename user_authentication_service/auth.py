@@ -1,10 +1,10 @@
 #!/usr/bin/env python3
 """
-This module provides an authentication class to manage user-related operations
-such as registration and login validation using hashed passwords.
+Authentication module for handling user registration and login.
 """
 
 import bcrypt
+import uuid
 from db import DB
 from user import User
 from sqlalchemy.orm.exc import NoResultFound
@@ -12,20 +12,18 @@ from sqlalchemy.orm.exc import NoResultFound
 
 class Auth:
     """
-    The Auth class is responsible for handling all
-    authentication logic, including
-    user registration and validating login credentials.
+    Auth class for managing user authentication.
     """
 
     def __init__(self) -> None:
         """
-        Initialize the Auth class with a database connection.
+        Initialize Auth with a database instance.
         """
         self._db = DB()
 
     def register_user(self, email: str, password: str) -> User:
         """
-        Register a new user by storing their email and a hashed password.
+        Register a new user with an email and hashed password.
         """
         try:
             self._db.find_user_by(email=email)
@@ -36,23 +34,25 @@ class Auth:
 
     def valid_login(self, email: str, password: str) -> bool:
         """
-        Validate user credentials by checking if the
-        user exists and if the password
-        matches the hashed password stored in the database.
+        Check if provided email and password match a registered user.
         """
         try:
             user: User = self._db.find_user_by(email=email)
         except Exception:
             return False
 
-        if not user or not user.hashed_password:
-            return False
-
-        return bcrypt.checkpw(password.encode("utf-8"), user.hashed_password)
+        return bcrypt.checkpw(password.encode(), user.hashed_password)
 
 
 def _hash_password(password: str) -> bytes:
     """
-    Hash a password using bcrypt with automatic salt generation.
+    Hash a password using bcrypt.
     """
-    return bcrypt.hashpw(password.encode("utf-8"), bcrypt.gensalt())
+    return bcrypt.hashpw(password.encode(), bcrypt.gensalt())
+
+
+def _generate_uuid() -> str:
+    """
+    Generate a new UUID string.
+    """
+    return str(uuid.uuid4())
