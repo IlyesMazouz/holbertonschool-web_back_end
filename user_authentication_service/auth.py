@@ -55,6 +55,33 @@ class Auth:
         self._db.update_user(user.id, session_id=session_id)
         return session_id
 
+    def get_user_from_session_id(self, session_id: str) -> User:
+        """
+        Retrieve the user corresponding to the given session ID.
+
+        If no user found or session_id is None, returns None.
+        """
+        if session_id is None:
+            return None
+
+        try:
+            user = self._db.find_user_by(session_id=session_id)
+            return user
+        except NoResultFound:
+            return None
+
+    def destroy_session(self, user_id: int) -> None:
+        """
+        Destroy the session for the user by setting their session_id to None.
+
+        The user is logged out.
+        """
+        try:
+            user = self._db.find_user_by(id=user_id)
+            self._db.update_user(user_id, session_id=None)
+        except NoResultFound:
+            pass
+
     def get_reset_password_token(self, email: str) -> str:
         """
         Generate a password reset token for the user.
